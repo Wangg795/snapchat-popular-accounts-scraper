@@ -1,0 +1,5 @@
+# One keyword per line. Lines starting with # are ignored.
+fashion
+gaming
+travel
+beauty
