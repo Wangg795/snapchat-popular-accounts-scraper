@@ -1,0 +1,122 @@
+"""
+    candidates = []
+
+    if explicit_path:
+        candidates.append(Path(explicit_path))
+    env_path = os.getenv("SNAPCHAT_SCRAPER_CONFIG")
+    if env_path:
+        candidates.append(Path(env_path))
+
+    candidates.append(DEFAULT_CONFIG_PATH)
+    candidates.append(DEFAULT_CONFIG_FALLBACK_PATH)
+
+    for path in candidates:
+        if path.is_file():
+            with path.open("r", encoding="utf-8") as f:
+                return json.load(f)
+
+    raise FileNotFoundError(
+        f"Could not locate configuration file. Tried: {', '.join(str(p) for p in candidates)}"
+    )
+
+def setup_logging(config: Dict[str, Any]) -> None:
+    logging_config = config.get("logging", {})
+    level_name = logging_config.get("level", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+def load_keywords(path: Path) -> List[str]:
+    if not path.is_file():
+        raise FileNotFoundError(f"Input keywords file not found: {path}")
+
+    keywords: List[str] = []
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            keywords.append(line)
+
+    if not keywords:
+        raise ValueError(f"No keywords found in {path}")
+
+    return keywords
+
+def build_parser_from_config(config: Dict[str, Any]) -> SnapchatParser:
+    snapchat_cfg = config.get("snapchat", {})
+
+    base_url = snapchat_cfg.get("base_url", "https://search.snapchat.com/search")
+    timeout = snapchat_cfg.get("timeout", 10)
+    max_results = snapchat_cfg.get("max_results", 100)
+    proxy = snapchat_cfg.get("proxy")
+    headers = snapchat_cfg.get("headers") or {}
+
+    return SnapchatParser(
+        base_url=base_url,
+        timeout=timeout,
+        max_profiles=max_results,
+        proxy=proxy,
+        headers=headers,
+    )
+
+def build_exporter_from_config(config: Dict[str, Any]) -> DataExporter:
+    export_cfg = config.get("export", {})
+    fmt = export_cfg.get("format", "json").lower()
+    output_path = export_cfg.get("output_path", "data/sample.json")
+
+    output_path_resolved = PROJECT_ROOT / output_path
+    return DataExporter(output_path=output_path_resolved, fmt=fmt)
+
+def run(config_path: Optional[str] = None, inputs_path: Optional[str] = None) -> int:
+    try:
+        config = load_config(config_path)
+    except Exception as exc:
+        logging.basicConfig(level=logging.INFO)
+        logging.error("Failed to load configuration: %s", exc)
+        return 1
+
+    setup_logging(config)
+    logger = logging.getLogger("runner")
+
+    try:
+        keywords_file = Path(inputs_path) if inputs_path else DEFAULT_INPUTS_PATH
+        keywords = load_keywords(keywords_file)
+    except Exception as exc:
+        logger.error("Failed to load keywords: %s", exc)
+        return 1
+
+    logger.info("Loaded %d keyword(s): %s", len(keywords), ", ".join(keywords))
+
+    parser = build_parser_from_config(config)
+    exporter = build_exporter_from_config(config)
+
+    try:
+        logger.info("Starting Snapchat scraping run...")
+        profiles: List[Dict[str, Any]] = parser.search_by_keywords(keywords)
+        logger.info("Scraping completed, collected %d profile(s).", len(profiles))
+
+        if not profiles:
+            logger.warning("No profiles were collected. Nothing to export.")
+        else:
+            exporter.export(profiles)
+            logger.info("Exported %d profile(s) to %s", len(profiles), exporter.output_path)
+
+        return 0
+    except KeyboardInterrupt:
+        logger.warning("Interrupted by user.")
+        return 130
+    except Exception as exc:
+        logger.exception("Unexpected error during scraping: %s", exc)
+        return 1
+
+if __name__ == "__main__":
+    # Allow optional CLI arguments:
+    #   python src/runner.py [config_path] [inputs_path]
+    cfg_path = sys.argv[1] if len(sys.argv) > 1 else None
+    inp_path = sys.argv[2] if len(sys.argv) > 2 else None
+    sys.exit(run(cfg_path, inp_path))
